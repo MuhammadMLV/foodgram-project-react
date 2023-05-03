@@ -2,18 +2,20 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from core import constants
+
 User = get_user_model()
 
 
 class Tag(models.Model):
     name = models.CharField(
         'Наименование',
-        max_length=200,
+        max_length=constants.MAX_LEN_RECIPE_NAME,
         unique=True
     )
     color = models.CharField(
         'Цветовой HEX-код',
-        max_length=7,
+        max_length=constants.HEX_LEN,
         unique=True,
         null=True,
         blank=True
@@ -21,7 +23,7 @@ class Tag(models.Model):
     slug = models.CharField(
         'Слаг',
         unique=True,
-        max_length=100
+        max_length=constants.MAX_LEN_RECIPE_NAME
     )
 
     class Meta:
@@ -36,11 +38,11 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(
         'Наименование',
-        max_length=200,
+        max_length=constants.MAX_LEN_RECIPE_NAME,
     )
     measurement_unit = models.CharField(
         'Единица измерения',
-        max_length=40
+        max_length=constants.MAX_LEN_MEASUREMENT_UNIT
     )
 
     class Meta:
@@ -61,7 +63,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     name = models.CharField(
         'Наименование',
-        max_length=200,
+        max_length=constants.MAX_LEN_RECIPE_NAME,
     )
     text = models.TextField(
         'Описание'
@@ -92,10 +94,12 @@ class Recipe(models.Model):
         verbose_name='Время приготовления',
         validators=(
             MinValueValidator(
-                1, 'Готовка должна длится минимум 1 минуту'
+                constants.MAX_COOKING_VALUE,
+                'Готовка должна длится минимум 1 минуту'
             ),
             MaxValueValidator(
-                300, 'Долго ждать приготовления блюда...'
+                constants.MAX_COOKING_VALUE,
+                'Долго ждать приготовления блюда...'
             ),
         )
     )
@@ -111,7 +115,7 @@ class Recipe(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=('name', 'author'),
-                name='unique_author_recipe',
+                name='unique_author_recipe'
             ),
         ]
 
@@ -135,7 +139,8 @@ class AmountIngredient(models.Model):
         'Количество',
         validators=[
             MinValueValidator(
-                1, 'Нужно хоть какое-то количество'
+                constants.MIN_INGREDIENT_AMOUNT,
+                'Нужно хоть какое-то количество'
             )
         ]
     )
