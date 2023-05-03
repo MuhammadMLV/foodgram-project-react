@@ -1,29 +1,31 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from core import constants
+
 
 class CustomUser(AbstractUser):
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
-        max_length=254,
+        max_length=constants.MAX_LEN_EMAIL,
         unique=True,
     )
     username = models.CharField(
         'Уникальный юзернейм',
-        max_length=150,
+        max_length=constants.MAX_LEN_USERNAME,
         unique=True,
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150,
+        max_length=constants.MAX_LEN_USERNAME,
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150,
+        max_length=constants.MAX_LEN_USERNAME,
     )
     password = models.CharField(
         'Пароль',
-        max_length=150,
+        max_length=constants.MAX_LEN_USERNAME,
     )
 
     class Meta:
