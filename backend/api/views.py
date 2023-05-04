@@ -8,13 +8,12 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly,
                                         IsAuthenticated, SAFE_METHODS)
-from rest_framework import mixins
 from rest_framework.response import Response
-from rest_framework.viewsets import (ReadOnlyModelViewSet, ModelViewSet,
-                                     GenericViewSet)
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from recipes.models import Tag, Ingredient, Recipe, ShoppingCart, Favorites
 from .filters import IngredientFilter
+from .mixins import CreateDeleteViewSet
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (SubscriptionSerializer, TagSerializer,
                           IngredientSerializer, RecipeListSerializer,
@@ -23,12 +22,6 @@ from .serializers import (SubscriptionSerializer, TagSerializer,
 from users.models import Subscription
 
 User = get_user_model()
-
-
-class CreateDeleteViewSet(mixins.CreateModelMixin,
-                          mixins.DestroyModelMixin,
-                          GenericViewSet):
-    pass
 
 
 class CustomUserViewSet(UserViewSet):
@@ -163,9 +156,7 @@ class ShoppingCartViewSet(CreateDeleteViewSet):
     serializer_class = ShoppingCartSerializer
 
     def get_queryset(self):
-        user = self.request.user.id
-
-        return ShoppingCart.objects.filter(user=user)
+        return self.request.user.shopping_cart.all()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -199,8 +190,7 @@ class FavoriteRecipeViewSet(CreateDeleteViewSet):
     serializer_class = FavoriteRecipeSerializer
 
     def get_queryset(self):
-        user = self.request.user.id
-        return Favorites.objects.filter(user=user)
+        return self.request.user.favorites.all()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -211,22 +201,19 @@ class FavoriteRecipeViewSet(CreateDeleteViewSet):
     def perform_create(self, serializer):
         serializer.save(
             user=self.request.user,
-            favorite_recipe=get_object_or_404(
+            recipe=get_object_or_404(
                 Recipe, id=self.kwargs.get('recipe_id')
             )
         )
 
     @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
-        user = request.user
-        if not user.favorite.select_related(
-                'favorite_recipe'
-        ).filter(favorite_recipe_id=recipe_id).exists():
+        if not request.user.favorites.filter(recipe_id=recipe_id).exists():
             return Response({'errors': 'Этого рецепта и так нет в избранном'},
                             status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             Favorites,
             user=request.user,
-            favorite_recipe_id=recipe_id).delete()
+            recipe_id=recipe_id).delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)

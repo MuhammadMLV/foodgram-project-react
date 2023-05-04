@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
                                 UserSerializer)
 from rest_framework import serializers
-
+from rest_framework.validators import UniqueTogetherValidator
 from recipes.models import (AmountIngredient, Favorites, Ingredient,
                             Recipe, ShoppingCart, Tag)
 from users.models import Subscription
@@ -80,30 +80,18 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(
-        source='author.email',
-        read_only=True)
-    id = serializers.IntegerField(
-        source='author.id',
-        read_only=True)
-    username = serializers.CharField(
-        source='author.username',
-        read_only=True)
-    first_name = serializers.CharField(
-        source='author.first_name',
-        read_only=True)
-    last_name = serializers.CharField(
-        source='author.last_name',
-        read_only=True)
     recipes = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(
-        source='author.recipe.count')
+        source='author.recipe.count'
+    )
 
     class Meta:
-        model = Subscription
+        model = User
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
+        validators = [UniqueTogetherValidator(
+            queryset=Subscription.objects.all(), fields=('author', 'user',))]
 
     def validate(self, data):
         user = self.context.get('request').user
@@ -111,15 +99,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         if user.id == int(author):
             raise serializers.ValidationError({
                 'error': 'Нельзя подписаться на самого себя'})
-        if Subscription.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError({
-                'error': 'Вы уже подписаны на данного пользователя'})
 
         return data
 
     def get_recipes(self, obj):
         return SubscribeRecipeSerializer(
-            obj.author.recipe.all(), many=True
+            obj.user.recipe.all(), many=True
         ).data
 
     def get_is_subscribed(self, obj):
@@ -289,13 +274,14 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            AmountIngredient.objects.bulk_create([
-                AmountIngredient(
-                    recipe=recipe,
-                    ingredient_id=ingredient.get('id'),
-                    amount=ingredient.get('amount'), )
-            ])
+        amount_ingredients = [
+            AmountIngredient(
+                recipe=recipe,
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
+            ) for ingredient in ingredients
+        ]
+        AmountIngredient.objects.bulk_create(amount_ingredients)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -327,17 +313,17 @@ class RecipeEditSerializer(serializers.ModelSerializer):
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(
-        source='favorite_recipe.id',
+        source='recipe.id',
     )
     name = serializers.ReadOnlyField(
-        source='favorite_recipe.name',
+        source='recipe.name',
     )
     image = serializers.CharField(
-        source='favorite_recipe.image',
+        source='recipe.image',
         read_only=True,
     )
     cooking_time = serializers.ReadOnlyField(
-        source='favorite_recipe.cooking_time',
+        source='recipe.cooking_time',
     )
 
     class Meta:
