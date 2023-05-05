@@ -1,7 +1,7 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import (MinValueValidator, MaxValueValidator,
+                                    RegexValidator)
 from django.db import models
 from django.contrib.auth import get_user_model
-
 from core import constants
 
 User = get_user_model()
@@ -18,7 +18,10 @@ class Tag(models.Model):
         max_length=constants.HEX_LEN,
         unique=True,
         null=True,
-        blank=True
+        blank=True,
+        validators=[RegexValidator(
+            regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+        )]
     )
     slug = models.CharField(
         'Слаг',

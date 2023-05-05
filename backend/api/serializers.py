@@ -63,11 +63,11 @@ class SetPasswordSerializer(PasswordSerializer):
         user = self.context.get('request').user
         if data['new_password'] == data['current_password']:
             raise serializers.ValidationError({
-                "new_password": "Пароли должны быть различные"})
+                'new_password': 'Пароли должны быть различные'})
         check_current = check_password(data['current_password'], user.password)
-        if check_current is False:
+        if not check_current:
             raise serializers.ValidationError({
-                "current_password": "Неверный пароль"})
+                'current_password': 'Неверный пароль'})
 
         return data
 

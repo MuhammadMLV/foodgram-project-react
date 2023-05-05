@@ -10,9 +10,8 @@ from rest_framework.permissions import (IsAuthenticatedOrReadOnly,
                                         IsAuthenticated, SAFE_METHODS)
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
-
 from recipes.models import Tag, Ingredient, Recipe, ShoppingCart, Favorites
-from .filters import IngredientFilter
+from .filters import IngredientFilter, TagFilter
 from .mixins import CreateDeleteViewSet
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (SubscriptionSerializer, TagSerializer,
@@ -106,6 +105,7 @@ class TagViewSet(ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
+    filterset_class = TagFilter
 
 
 class RecipeViewSet(ModelViewSet):
