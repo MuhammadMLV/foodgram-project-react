@@ -1,5 +1,4 @@
-from django.core.validators import (MinValueValidator, MaxValueValidator,
-                                    RegexValidator)
+from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.auth import get_user_model
 from core import constants
@@ -95,16 +94,6 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления',
-        validators=(
-            MinValueValidator(
-                constants.MAX_COOKING_VALUE,
-                'Готовка должна длится минимум 1 минуту'
-            ),
-            MaxValueValidator(
-                constants.MAX_COOKING_VALUE,
-                'Долго ждать приготовления блюда...'
-            ),
-        )
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
