@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from djoser.serializers import UserCreateSerializer, SetPasswordSerializer
+from djoser.serializers import SetPasswordSerializer
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,6 +10,7 @@ from rest_framework.permissions import (IsAuthenticatedOrReadOnly,
                                         IsAuthenticated, SAFE_METHODS)
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+
 from recipes.models import Tag, Ingredient, Recipe, ShoppingCart, Favorites
 from .filters import IngredientFilter, TagFilter
 from .mixins import CreateDeleteViewSet
@@ -17,7 +18,8 @@ from .permissions import IsOwnerOrReadOnly
 from .serializers import (SubscriptionSerializer, TagSerializer,
                           IngredientSerializer, RecipeListSerializer,
                           RecipeEditSerializer, UserListSerializer,
-                          ShoppingCartSerializer, FavoriteRecipeSerializer)
+                          ShoppingCartSerializer, FavoriteRecipeSerializer,
+                          CreateUserSerializer)
 from users.models import Subscription
 
 User = get_user_model()
@@ -31,7 +33,7 @@ class CustomUserViewSet(UserViewSet):
         if self.action == 'set_password':
             return SetPasswordSerializer
         if self.action == 'create':
-            return UserCreateSerializer
+            return CreateUserSerializer
 
         return UserListSerializer
 
