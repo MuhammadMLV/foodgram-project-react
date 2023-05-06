@@ -110,7 +110,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context.get('request').user
-        author = self.context.get('author_id')
+        author = self.context.get('user_id')
         if user.id == int(author):
             raise serializers.ValidationError({
                 'error': 'Нельзя подписаться на самого себя'})
