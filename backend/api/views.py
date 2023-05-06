@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from recipes.models import Tag, Ingredient, Recipe, ShoppingCart, Favorites
-from .filters import IngredientFilter, TagFilter
+from .filters import IngredientFilter, TagFilter, RecipeFilter
 from .mixins import CreateDeleteViewSet
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (SubscriptionSerializer, TagSerializer,
@@ -114,6 +114,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:

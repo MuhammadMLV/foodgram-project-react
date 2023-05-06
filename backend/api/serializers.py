@@ -6,7 +6,6 @@ from django.core.files.base import ContentFile
 from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
                                 UserSerializer)
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (AmountIngredient, Favorites, Ingredient,
                             Recipe, ShoppingCart, Tag)

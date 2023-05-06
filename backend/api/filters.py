@@ -23,7 +23,7 @@ class IngredientFilter(FilterSet):
         fields = ('name', )
 
 
-class RecipesFilter(FilterSet):
+class RecipeFilter(FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
         queryset=Tag.objects.all(),
         field_name='tags__slug',
@@ -42,6 +42,13 @@ class RecipesFilter(FilterSet):
     class Meta:
         model = Recipe
         fields = ['is_favorited', 'author', 'tags', 'is_in_shopping_cart']
+
+    def get_is_favorited(self, queryset, name, value):
+        user = self.request.user
+        if value and user.is_authenticated:
+            return queryset.filter(favorite_recipe__user=user)
+
+        return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
         user = self.request.user
