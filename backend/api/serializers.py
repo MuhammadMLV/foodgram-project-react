@@ -108,14 +108,14 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         validators = [UniqueTogetherValidator(
             queryset=Subscription.objects.all(), fields=('author', 'user',))]
 
-    def validate(self, data):
-        user = self.context.get('request').user
-        author = self.context.get('user_id')
-        if user.id == int(author):
-            raise serializers.ValidationError({
-                'error': 'Нельзя подписаться на самого себя'})
-
-        return data
+    # def validate(self, data):
+    #     user = self.context.get('request').user
+    #     author = self.context.get('user_id')
+    #     if user.id == int(author):
+    #         raise serializers.ValidationError({
+    #             'error': 'Нельзя подписаться на самого себя'})
+    #
+    #     return data
 
     def get_recipes(self, obj):
         return SubscribeRecipeSerializer(
