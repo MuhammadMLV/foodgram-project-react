@@ -83,19 +83,24 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     email = serializers.CharField(
         source='author.email',
-        read_only=True)
+        read_only=True
+    )
     id = serializers.IntegerField(
         source='author.id',
-        read_only=True)
+        read_only=True
+    )
     username = serializers.CharField(
         source='author.username',
-        read_only=True)
+        read_only=True
+    )
     first_name = serializers.CharField(
         source='author.first_name',
-        read_only=True)
+        read_only=True
+    )
     last_name = serializers.CharField(
         source='author.last_name',
-        read_only=True)
+        read_only=True
+    )
     recipes = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(
@@ -105,21 +110,19 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
-        validators = [UniqueTogetherValidator(
-            queryset=Subscription.objects.all(), fields=('author', 'user',))]
 
-    # def validate(self, data):
-    #     user = self.context.get('request').user
-    #     author = self.context.get('user_id')
-    #     if user.id == int(author):
-    #         raise serializers.ValidationError({
-    #             'error': 'Нельзя подписаться на самого себя'})
-    #
-    #     return data
+    def validate(self, data):
+        user = self.context.get('request').user
+        author = self.context.get('author_id')
+        if user.id == int(author):
+            raise serializers.ValidationError({
+                'error': 'Нельзя подписаться на самого себя'})
+
+        return data
 
     def get_recipes(self, obj):
         return SubscribeRecipeSerializer(
-            obj.user.recipe.all(), many=True
+            obj.author.recipes.all(), many=True
         ).data
 
     def get_is_subscribed(self, obj):
