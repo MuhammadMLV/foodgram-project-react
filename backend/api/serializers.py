@@ -81,6 +81,26 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(
+        source='author.email',
+        read_only=True
+    )
+    id = serializers.IntegerField(
+        source='author.id',
+        read_only=True
+    )
+    username = serializers.CharField(
+        source='author.username',
+        read_only=True
+    )
+    first_name = serializers.CharField(
+        source='author.first_name',
+        read_only=True
+    )
+    last_name = serializers.CharField(
+        source='author.last_name',
+        read_only=True
+    )
     recipes = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(
@@ -88,7 +108,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = User
+        model = Subscription
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
         validators = [UniqueTogetherValidator(
