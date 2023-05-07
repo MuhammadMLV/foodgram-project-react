@@ -143,7 +143,7 @@ class RecipeViewSet(ModelViewSet):
         amount_sum = 'recipe__recipe__amount__sum'
         cart = user.shopping_cart.select_related('recipe').values(
             ingredient_name, ingredient_unit
-        ).annotate(Sum(recipe_amount))
+        ).annotate(Sum(recipe_amount)).order_by(ingredient_name)
         for _ in cart:
             text += (
                 f'{_[ingredient_name]} ({_[ingredient_unit]})'
