@@ -36,8 +36,9 @@ docker-compose up --build -d
 После запуска приложения в контейнере необходимо выполнить следующие команды
 
 ```
-docker-compose exec web python manage.py migrate — применить миграции
-docker-compose exec web python manage.py collectstatic --no-input — применить статику
+docker-compose exec backend python manage.py migrate — применить миграции
+docker-compose exec backend python manage.py collectstatic --no-input — применить статику
+docker-compose exec backend python manage.py load_ingredients - загрузка ингредиентов
 ```
 
 ### Доступ к сайту админке 
